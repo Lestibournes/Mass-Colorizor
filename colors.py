@@ -1,0 +1,21 @@
+{
+	"White": "#FFFFFF",
+	"Black": "#000000",
+	"Red": "#FF0000",
+	"DarkOrange": "#FF8C00",
+	"Orange": "#FFA500",
+	"Yellow": "#FFFF00",
+	"Lime": "#00FF00",
+	"Green": "#008000",
+	"Cyan": "#00FFFF",
+	"Magenta": "#FF00FF",
+	"Silver": "#C0C0C0",
+	"Gray": "#808080",
+	"Grey": "#808080",
+	"Maroon": "#800000",
+	"Olive": "#808000",
+	"DarkBlue": "#0000A0",
+	"LightBlue": "#ADD8E6",
+	"Purple": "#800080",
+	"Brown": "#A52A2A"
+}

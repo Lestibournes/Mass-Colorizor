@@ -1,16 +1,17 @@
 {
-    "Grey": {
+    "Blue": {
         "from": {
             "hue": {
-                "value": 0
+				"value": 220,
+				"min": 180,
+				"max": 260
             }
         },
         "to": {
             "hue": {
-                "value": 30
-            },
-            "saturation": {
-                "value": 30
+				"value": 30,
+				"min": 10,
+				"max": 50
             }
         }
     },
@@ -20,8 +21,14 @@
         },
         "to": {
             "hue": {
-                "value": 30
-            }
+				"value": 30
+			},
+			"saturation": {
+				"value": 30
+			},
+			"value": {
+				"value": 100
+			}
         }
     }
 }

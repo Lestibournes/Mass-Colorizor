@@ -10,9 +10,6 @@ hex_pattern_short = r'#([a-fA-F0-9]{3})([^a-fA-F0-9])'
 rgba_pattern = r'rgba\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d(?:\.\d+)?)\)'
 rgb_pattern = r'rgba\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)'
 
-names = ["Red", "White", "Cyan", "Silver", "Blue", "Gray", "Grey", "DarkBlue", "Black", "LightBlue",
-		"Orange", "Purple", "Brown", "Yellow", "Maroon", "Lime", "Green", "Magenta", "Olive"]
-
 files = {}
 search = None
 
@@ -23,6 +20,8 @@ for arg in sys.argv:
 		files["dest"] = os.path.expanduser(arg.split("=")[1])
 	if arg.startswith("--config="):
 		files["config"] = os.path.expanduser(arg.split("=")[1])
+	if arg.startswith("--colors="):
+		files["colors"] = os.path.expanduser(arg.split("=")[1])
 	if arg.startswith("--search"):
 		search = arg.split("=")[1]
 
@@ -33,13 +32,19 @@ if not search:
 	if "dest" not in files:
 		print("missing destination")
 		exit()
+	elif os.path.exists(files["dest"]) and not os.path.isdir(files["dest"]):
+		print("destination must be a directory")
+		exit()
 	if "config" not in files:
 		print("missing config")
 		exit()
 	else:
 		config = json.load(open(files["config"], "r"))
 
-
+if "colors" in files:
+	names = json.load(open(files["colors"], "r"))
+else:
+	names = {}
 
 # returns an hsv with a scale of: hue [0, 1], saturation [0, 1], value [0, 1]
 def to_hsv(color):
@@ -103,7 +108,7 @@ def convert(hsv):
 		hsv = (0, 0, 0)
 
 	destination_hsv = hsv
-
+	
 	for color in sorted(config):
 		match = (False, False, False)
 		from_hue_value = None
@@ -111,46 +116,11 @@ def convert(hsv):
 		from_value_value = None
 		
 		if "name" in config[color]["from"]:
-			if config[color]["from"]["name"].lower() == "white" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#FFFFFF"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "black" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#000000"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "red" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#FF0000"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "dark orange" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#FF8000"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "orange" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#FFA500"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "yellow" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#FFFF00"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "lime" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#00FF00"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "green" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#008000"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "cyan" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#00FFFF"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "magenta" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#FF00FF"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "brown" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#A52A2A"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "Silver" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#C0C0C0"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "Gray" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#808080"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "Grey" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#808080"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "Maroon" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#800000"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "Olive" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#808000"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "DarkBlue" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#0000A0"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "LightBlue" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#ADD8E6"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "Purple" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#800080"):
-				match = (True, True, True)
-			if config[color]["from"]["name"].lower() == "brown" and (hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))) == "#A52A2A"):
-				match = (True, True, True)
+			for name in names:
+				if config[color]["from"]["name"].lower() == name.lower() and hsv_to_hex((round(hsv[0]/360), round(hsv[1]/100),round(hsv[2]/100))).lower() == names[name].lower():
+					match = (True, True, True)
+					break
+
 		else:
 			if "hue" in config[color]["from"]:
 				from_hue_value = config[color]["from"]["hue"]["value"]
@@ -187,7 +157,7 @@ def convert(hsv):
 					match = (match[0], match[1], True)
 			else:
 				match = (match[0], match[1], True)
-
+		
 		if match[0] and match[1] and match [2]:
 			if "hue" in config[color]["to"]:
 				to_hue_value = config[color]["to"]["hue"]["value"]
@@ -198,14 +168,14 @@ def convert(hsv):
 				
 				if from_hue_value:
 					hue_distance = hsv[0] - from_hue_value
-					hue_bottom_scale = (from_hue_value - from_hue_min) / (to_hue_value - to_hue_min)
-					hue_top_scale = (from_hue_max - from_hue_value) / (to_hue_max - to_hue_value)
-
-					if hsv[0] <= to_hue_value: destination_hsv = (hue_distance * hue_bottom_scale, destination_hsv[1], destination_hsv[2])
-					else: destination_hsv = (hue_distance * hue_top_scale, destination_hsv[1], destination_hsv[2])
+					hue_bottom_scale = (to_hue_value - to_hue_min) / (from_hue_value - from_hue_min)
+					hue_top_scale = (to_hue_max - to_hue_value) / (from_hue_max - from_hue_value)
+					
+					if hsv[0] <= from_hue_value: destination_hsv = (to_hue_value + hue_distance * hue_bottom_scale, destination_hsv[1], destination_hsv[2])
+					else: destination_hsv = (to_hue_value + hue_distance * hue_top_scale, destination_hsv[1], destination_hsv[2])
 				else:
 					destination_hsv = (to_hue_value, destination_hsv[1], destination_hsv[2])
-
+			
 			if "saturation" in config[color]["to"]:
 				to_saturation_value = config[color]["to"]["saturation"]["value"]
 				to_saturation_min = to_saturation_value
@@ -215,11 +185,11 @@ def convert(hsv):
 				
 				if from_saturation_value:
 					saturation_distance = hsv[0] - from_saturation_value
-					saturation_bottom_scale = (from_saturation_value - from_saturation_min) / (to_saturation_value - to_saturation_min)
-					saturation_top_scale = (from_saturation_max - from_saturation_value) / (to_saturation_max - to_saturation_value)
+					saturation_bottom_scale = (to_saturation_value - to_saturation_min) / (from_saturation_value - from_saturation_min)
+					saturation_top_scale = (to_saturation_max - to_saturation_value) / (from_saturation_max - from_saturation_value)
 
-					if hsv[0] <= to_saturation_value: destination_hsv = (destination_hsv[0], saturation_distance * saturation_bottom_scale, destination_hsv[2])
-					else: destination_hsv = (destination_hsv[0], saturation_distance * saturation_top_scale, destination_hsv[2])
+					if hsv[0] <= from_saturation_value: destination_hsv = (destination_hsv[0], to_saturation_value + saturation_distance * saturation_bottom_scale, destination_hsv[2])
+					else: destination_hsv = (destination_hsv[0], to_saturation_value + saturation_distance * saturation_top_scale, destination_hsv[2])
 				else:
 					destination_hsv = (destination_hsv[0], to_saturation_value, destination_hsv[2])
 
@@ -232,14 +202,15 @@ def convert(hsv):
 				
 				if from_value_value:
 					value_distance = hsv[0] - from_value_value
-					value_bottom_scale = (from_value_value - from_value_min) / (to_value_value - to_value_min)
-					value_top_scale = (from_value_max - from_value_value) / (to_value_max - to_value_value)
+					value_bottom_scale = (to_value_value - to_value_min) / (from_value_value - from_value_min)
+					value_top_scale = (to_value_max - to_value_value) / (from_value_max - from_value_value)
 
-					if hsv[0] <= to_value_value: destination_hsv = (value_distance * value_bottom_scale, destination_hsv[1], destination_hsv[2])
-					else: destination_hsv = (value_distance * value_top_scale, destination_hsv[1], destination_hsv[2])
+					if hsv[0] <= from_value_value: destination_hsv = (destination_hsv[0], destination_hsv[1], to_value_value + value_distance * value_bottom_scale)
+					else: destination_hsv = (destination_hsv[0], destination_hsv[1], to_value_value + value_distance * value_top_scale)
 				else:
-					destination_hsv = (to_value_value, destination_hsv[1], destination_hsv[2])
-			return destination_hsv
+					destination_hsv = (destination_hsv[0], destination_hsv[1], to_value_value)
+	
+	return destination_hsv
 
 def convert_hex(match):
 	hex_source = match.group(0).strip('#')
@@ -296,7 +267,7 @@ def convert_rgba(match):
 	hsv_source = colorsys.rgb_to_hsv(rgb_source[0]/255, rgb_source[1]/255, rgb_source[2]/255)
 
 	hsv_destination = convert((hsv_source[0] * 360, hsv_source[1] * 100, hsv_source[2] * 100))
-
+	
 	if hsv_destination:
 		hsv_destination = (hsv_destination[0] / 360, hsv_destination[1] / 100, hsv_destination[2] / 100)
 		rgb_destination = colorsys.hsv_to_rgb(hsv_destination[0], hsv_destination[1], hsv_destination[2])
@@ -320,23 +291,24 @@ def convert_rgb(match):
 	match.group(0)
 
 def convert_name(match):
-	print(match.group(0))
-	if match.group(0).lower() == "white":
-		hsv_source = (0, 0, 1)
-	if match.group(0).lower() == "red":
-		hsv_source = (0, 1, 1)
-	if match.group(0).lower() == "grey" or match.group(0).lower() == "gray":
-		hsv_source = (0, 0, 0.52)
+	hsv_source = None
 
-	hsv_destination = convert((hsv_source[0] * 360, hsv_source[1] * 100, hsv_source[2] * 100))
+	for name in names:
+		if match.group(0).lower() == name.lower():
+			hsv_source = to_hsv(names[name])
 
-	if hsv_destination:
-		hsv_destination = (hsv_destination[0] / 360, hsv_destination[1] / 100, hsv_destination[2] / 100)
-		rgb_destination = colorsys.hsv_to_rgb(hsv_destination[0], hsv_destination[1], hsv_destination[2])
+			hsv_destination = convert((hsv_source[0] * 360, hsv_source[1] * 100, hsv_source[2] * 100))
+
+			if hsv_destination:
+				hsv_destination = (hsv_destination[0] / 360, hsv_destination[1] / 100, hsv_destination[2] / 100)
+				rgb_destination = colorsys.hsv_to_rgb(hsv_destination[0], hsv_destination[1], hsv_destination[2])
+				
+				return "rgb(" + str(round(rgb_destination[0] * 255)) + ", " + str(round(rgb_destination[1] * 255)) + ", " + str(round(rgb_destination[2] * 255)) + ")"
+
+			break
 		
-		return "rgb(" + str(round(rgb_destination[0] * 255)) + ", " + str(round(rgb_destination[1] * 255)) + ", " + str(round(rgb_destination[2] * 255)) + ")"
-	
-	match.group(0)
+		
+	return match.group(0)
 
 recursive = "-r" in sys.argv
 
@@ -379,6 +351,8 @@ if search:
 			except UnicodeDecodeError:
 				pass
 else:
+	if not os.path.exists(files["dest"]):
+		os.makedirs(files["dest"])
 	for src_file in glob.glob(files["src"] + "/**/*", recursive=recursive):
 		dest_file = src_file.replace(files["src"], files["dest"])
 
@@ -388,7 +362,9 @@ else:
 		if os.path.isfile(src_file) and src_file not in files:
 			try:
 				output = ""
-				print("File: " + src_file)
+				show = False
+				feedback = ""
+				
 				for index, line in enumerate(open(src_file, "r").readlines()):
 					text = re.sub(hex_pattern, convert_hex, line)
 					text = re.sub(hex_pattern_short, convert_hex_short, text)
@@ -398,10 +374,14 @@ else:
 						text = re.sub(name, convert_name, text)
 
 					if "--verbose" in sys.argv and (re.search(hex_pattern, line) or re.search(rgba_pattern, line)):
-						print("Line " + str(index) + ": ")
-						print(line + text)
+						show = True
+						feedback = "Line " + str(index) + ": \n" + line + text
+					
 					output += text
 
+				if show:
+					print("File: " + src_file)
+					print(feedback)
 				open(dest_file, "w").write(output)
 			except UnicodeDecodeError:
 				pass
