@@ -1,0 +1,17 @@
+{
+    "Grey": {
+        "from": {
+            "saturation": {
+                "value": 0
+            }
+        },
+        "to": {
+            "hue": {
+                "value": 30
+            },
+            "saturation": {
+                "value": 30
+            }
+        }
+    }
+}
